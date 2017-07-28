@@ -43,7 +43,11 @@ WHITE = 1
 BLACK = 0
 
 CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
-DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
+DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
+
+
+CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
+CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
 
 def main(argv):
 
@@ -57,6 +61,11 @@ def main(argv):
 
     demo(papirus)
 
+def format_time(now):
+    return '{h:02d}:{m:02d}:{s:02d}'.format(h=now.hour, m=now.minute, s=now.second)
+
+def format_date(now):
+    return '{dow} {d:02d} {moy}'.format(dow=CLOCK_WEEKDAYS[now.weekday()], d=now.day, moy=CLOCK_MONTHS[now.month - 1])
 
 def demo(papirus):
     """simple partial update demo - draw a clock"""
@@ -87,12 +96,12 @@ def demo(papirus):
 
         if now.day != previous_day:
             draw.rectangle((2, 2, width - 2, height - 2), fill=WHITE, outline=BLACK)
-            draw.text((10, clock_font_size + 10), '{y:04d}-{m:02d}-{d:02d}'.format(y=now.year, m=now.month, d=now.day), fill=BLACK, font=date_font)
+            draw.text((10, clock_font_size + 10), format_date(now), fill=BLACK, font=date_font)
             previous_day = now.day
         else:
             draw.rectangle((5, 10, width - 5, 10 + clock_font_size), fill=WHITE, outline=WHITE)
 
-        draw.text((5, 10), '{h:02d}:{m:02d}:{s:02d}'.format(h=now.hour, m=now.minute, s=now.second), fill=BLACK, font=clock_font)
+        draw.text((5, 10), format_time(now), fill=BLACK, font=clock_font)
 
         # display image on the panel
         papirus.display(image)
