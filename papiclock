@@ -56,19 +56,19 @@ class ClockDims:
         self.screen_height = screen_width,
         self.top_margin = 1
         self.left_margin = 2
-        self.clock_interline = -2
-        self.clock_font_size = int((screen_width - self.left_margin)/(8*0.65))     # 8 chars HH:MM:SS
-        self.date_font_size = int((screen_width - self.left_margin)/(10*0.65))     # 10 chars YYYY-MM-DD
-        self.meteo_font_size = int((screen_width - self.left_margin)/(23*0.65))    # 4*5 + 3 chars
-        self.clock_y = self.top_margin + 2*self.clock_interline
-        self.date_y = self.clock_y + self.clock_font_size + 2*self.clock_interline
+        self.clock_interline = -4
+        self.clock_font_size = int((screen_width - self.left_margin)/(8*0.65))       # 8 chars HH:MM:SS
+        self.date_font_size = int((screen_width - self.left_margin)/(10*0.65))       # 10 chars YYYY-MM-DD
+        self.meteo_font_size = int(((screen_width/4.0) - self.left_margin)/(6*0.65)) # 6 chars on a quarter screen
+        self.clock_y = self.top_margin + self.clock_interline
+        self.date_y = self.clock_y + self.clock_font_size + self.clock_interline
         self.sep_y = self.date_y + self.date_font_size
         self.meteo_y = []
         for i in range(4):
-            self.meteo_y.append(self.clock_font_size + self.date_font_size + 2*self.clock_interline + i*self.meteo_font_size)
-        self.sep_x = []    
+            self.meteo_y.append(self.clock_font_size + self.date_font_size + self.clock_interline + i*self.meteo_font_size)
+        self.meteo_x = []    
         for i in range(4):
-            self.sep_x.append(self.left_margin + int((screen_width - self.left_margin)*((5.5*i)/24.0)))
+            self.meteo_x.append(int(i*(screen_width/4.0)))
 
 def main(argv):
 
@@ -89,12 +89,13 @@ def format_date(now):
     return '{dow} {d:02d} {moy}'.format(dow=CLOCK_WEEKDAYS[now.weekday()], d=now.day, moy=CLOCK_MONTHS[now.month - 1])
 
 def meteo_test():
-    return [
-        '14:00 17:00 20:00 23:00',
-        "1015  1016  1015  1014",
-        "30    31    30    28",
-        "17 33505 33005  31007"
-    ]
+    meteo_dict = {}
+    meteo_dict["items"] = ["hour", "pres", "temp", "wind"]
+    meteo_dict["hour"] = ["14:00","17:00","20:00","23:00"]
+    meteo_dict["pres"] = ["1015","1016","1015","1014"]
+    meteo_dict["temp"] = ["30","31","30","28"]
+    meteo_dict["wind"] = ["17 335","05 330","05 310", "07 310"]
+    return meteo_dict
 
 def demo(papirus):
     """simple partial update demo - draw a clock"""
@@ -128,12 +129,16 @@ def demo(papirus):
         if now.day != previous_day:
             draw.rectangle((0, 0, width - 1, height - 1), fill=WHITE, outline=BLACK) # outer line
             draw.text((cd.left_margin, cd.date_y), format_date(now), fill=BLACK, font=date_font) # date
-            meteo_array = meteo_test()
-            for i in range(4):
-                draw.text((cd.left_margin, cd.meteo_y[i]), meteo_array[i], fill=BLACK, font=meteo_font)
+            #meteo_array = meteo_test()
+            #for i in range(4):
+            #    draw.text((cd.left_margin, cd.meteo_y[i]), meteo_array[i], fill=BLACK, font=meteo_font)
+            meteo_dict = meteo_test()
+            for ix in range(4):
+                for iy,it in enumerate(meteo_dict["items"]):
+                    draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][ix], fill=BLACK, font=meteo_font)
             draw.line((0, cd.sep_y, width - 1, cd.sep_y), fill=BLACK   )
             for i in range(1,4):
-                draw.line((cd.sep_x[i], cd.sep_y, cd.sep_x[i], height - 1), fill=BLACK)
+                draw.line((cd.meteo_x[i], cd.sep_y, cd.meteo_x[i], height - 1), fill=BLACK)
             previous_day = now.day
         else:
             draw.rectangle((cd.left_margin, cd.top_margin, width - cd.left_margin, cd.clock_y + cd.clock_font_size), fill=WHITE, outline=WHITE)
