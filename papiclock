@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # Copyright 2013-2015 Pervasive Displays, Inc.
+# Copyright 2017 Edouard Griffiths, F4EXB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,10 +43,12 @@ if not (os.path.exists('/dev/gpiomem') and os.access('/dev/gpiomem', os.R_OK | o
 WHITE = 1
 BLACK = 0
 
+CLOCK_LATITUDE = 43.5764327
+CLOCK_LONGITUDE = 7.1042904
+
 CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
 DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
 METEO_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
-
 
 CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
 CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
@@ -92,7 +95,7 @@ def meteo_test():
     meteo_dict = {}
     meteo_dict["items"] = ["hour", "pres", "temp", "wind"]
     meteo_dict["hour"] = ["14:00","17:00","20:00","23:00"]
-    meteo_dict["pres"] = ["1015","1016","1015","1014"]
+    meteo_dict["pres"] = ["1015.7","1016.1","1015.3","1014.7"]
     meteo_dict["temp"] = ["30","31","30","28"]
     meteo_dict["wind"] = ["17 335","05 330","05 310", "07 310"]
     return meteo_dict
@@ -129,9 +132,6 @@ def demo(papirus):
         if now.day != previous_day:
             draw.rectangle((0, 0, width - 1, height - 1), fill=WHITE, outline=BLACK) # outer line
             draw.text((cd.left_margin, cd.date_y), format_date(now), fill=BLACK, font=date_font) # date
-            #meteo_array = meteo_test()
-            #for i in range(4):
-            #    draw.text((cd.left_margin, cd.meteo_y[i]), meteo_array[i], fill=BLACK, font=meteo_font)
             meteo_dict = meteo_test()
             for ix in range(4):
                 for iy,it in enumerate(meteo_dict["items"]):
@@ -141,7 +141,7 @@ def demo(papirus):
                 draw.line((cd.meteo_x[i], cd.sep_y, cd.meteo_x[i], height - 1), fill=BLACK)
             previous_day = now.day
         else:
-            draw.rectangle((cd.left_margin, cd.top_margin, width - cd.left_margin, cd.clock_y + cd.clock_font_size), fill=WHITE, outline=WHITE)
+            draw.rectangle((cd.left_margin, cd.top_margin, width - cd.left_margin, cd.clock_y + cd.clock_font_size), fill=WHITE, outline=WHITE) # prepare time redraw
 
         if now.second % 2 == 0:
             draw.text((cd.left_margin, cd.clock_y), format_time(now), fill=BLACK, font=clock_font) # time
