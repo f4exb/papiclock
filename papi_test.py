@@ -27,14 +27,21 @@ import papiClock
 METEO_LATITUDE = 43.5764327
 METEO_LONGITUDE = 7.1042904
 
+# 1: apt-get install fonts-freefont-ttf
+# 2: apt-get install fonts-dejavu-core
+# 3: apt-get install ttf-bitstream-vera
+
 #CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
 CLOCK_FONT_FILE = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
+#CLOCK_FONT_FILE = '/usr/share/fonts/truetype/ttf-bitstream-vera/VeraMoBd.ttf'
 
 #DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
 DATE_FONT_FILE = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
+#DATE_FONT_FILE = '/usr/share/fonts/truetype/ttf-bitstream-vera/VeraMoBd.ttf'
 
 #METEO_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
 METEO_FONT_FILE  = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
+#METEO_FONT_FILE  = '/usr/share/fonts/truetype/ttf-bitstream-vera/VeraMono.ttf'
     
 CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
 CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
