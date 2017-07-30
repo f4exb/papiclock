@@ -78,13 +78,13 @@ def main(argv):
     # clear the display buffer
     draw.rectangle((0, 0, width, height), fill=WHITE, outline=WHITE)
 
-    now = datetime.datetime(2017, 7, 30, 14, 59, 14)
+    now = datetime.datetime(2017, 8, 1, 14, 59, 14)
     meteo_dict = meteo_test()
     
     draw.rectangle((0, 0, width - 1, height - 1), fill=WHITE, outline=BLACK) # outer line
-    draw.text((cd.left_margin, cd.date_y), format_date(now), fill=BLACK, font=date_font) # date
+    draw.text((cd.left_margin + 4, cd.date_y), format_date(now), fill=BLACK, font=date_font) # date
     draw.rectangle((cd.left_margin, cd.top_margin, width - cd.left_margin, cd.clock_y + cd.clock_font_size), fill=WHITE, outline=WHITE) # prepare time redraw
-    draw.text((cd.left_margin, cd.clock_y), format_time(now), fill=BLACK, font=clock_font) # time
+    draw.text((cd.left_margin + 4, cd.clock_y), format_time(now), fill=BLACK, font=clock_font) # time
   
     draw.rectangle((cd.left_margin, cd.sep_y, width - 2, height - 2), fill=WHITE, outline=WHITE) # prepare meteo redraw
     for ix in range(len(meteo_dict["hour"])):

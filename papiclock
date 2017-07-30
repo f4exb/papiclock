@@ -51,32 +51,17 @@ BLACK = 0
 CLOCK_LATITUDE = 43.5764327
 CLOCK_LONGITUDE = 7.1042904
 
-CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
-DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
-METEO_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
+#CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
+CLOCK_FONT_FILE = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
+
+#DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
+DATE_FONT_FILE = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
+
+#METEO_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
+METEO_FONT_FILE  = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 
 CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
 CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
-
-class ClockDims:
-    def __init__(self, screen_width, screen_height):
-        self.screen_width = screen_width,
-        self.screen_height = screen_width,
-        self.top_margin = 1
-        self.left_margin = 2
-        self.clock_interline = -4
-        self.clock_font_size = int((screen_width - self.left_margin)/(8*0.65))       # 8 chars HH:MM:SS
-        self.date_font_size = int((screen_width - self.left_margin)/(10*0.65))       # 10 chars YYYY-MM-DD
-        self.meteo_font_size = int(((screen_width/4.0) - self.left_margin)/(6*0.65)) # 6 chars on a quarter screen
-        self.clock_y = self.top_margin + self.clock_interline
-        self.date_y = self.clock_y + self.clock_font_size + self.clock_interline
-        self.sep_y = self.date_y + self.date_font_size
-        self.meteo_y = []
-        for i in range(4):
-            self.meteo_y.append(self.clock_font_size + self.date_font_size + self.clock_interline + i*self.meteo_font_size)
-        self.meteo_x = []    
-        for i in range(4):
-            self.meteo_x.append(int(i*(screen_width/4.0)))
 
 def main(argv):
 
@@ -116,7 +101,7 @@ def demo(papirus):
     width, height = image.size
 
     # get and init the clock constant dimensions
-    cd = ClockDims(width, height)
+    cd = papiClock.ClockDims(width, height)
 
     clock_font = ImageFont.truetype(CLOCK_FONT_FILE, cd.clock_font_size)
     date_font = ImageFont.truetype(DATE_FONT_FILE, cd.date_font_size)
