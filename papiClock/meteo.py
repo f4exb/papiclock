@@ -44,6 +44,7 @@ class Meteo(object):
         self.result_info_climat = test.METEO_TEST_RESULT
         print("%s: Meteo.getInfoWorker: Got result" % __file__)
         self.parseInfo()
+        self.data_available = True
 
     def getInfo(self):
         t = threading.Thread(target=self.getInfoWorker, args=(self.info_climat.url,))
