@@ -102,6 +102,8 @@ class Meteo(object):
                     meteo_info["vent_direction"] = int(v["10m"]) % 360
                 elif k == "risque_neige":
                     meteo_info["risque_neige"] = (v == "oui")
+                elif k == "humidite":
+                     meteo_info["humidite"] = v["2m"]
             except Exception as e:
                 print("%s: Meteo.parseItem: Date %s Exception %s at key %s" % (__file__, ts, str(e), k))
                 pass
@@ -111,11 +113,12 @@ class Meteo(object):
         date_keys = self.data.keys()
         date_keys.sort()
         meteo_dict = {}
-        meteo_dict["items"] = ["hour", "pres", "temp", "wind"]
+        meteo_dict["items"] = ["hour", "pres", "temp", "wind", "gust"]
         meteo_dict["hour"] = []
         meteo_dict["pres"] = []
         meteo_dict["temp"] = []
         meteo_dict["wind"] = []
+        meteo_dict["gust"] = []
         for dk in date_keys:
             if dk > now - datetime.timedelta(hours=3):
                 if len(meteo_dict["hour"]) == 0 and self.previous_run_number != self.run_number:
@@ -130,10 +133,22 @@ class Meteo(object):
                     pluie = 99
                 meteo_dict["temp"].append("%+2.0f %2.0f" % (temp, round(pluie, 0)))
                 vent_moy = self.data[dk].get("vent_moyen", 0)
-                if vent_moy >= 100:
-                    vent_moy = 99
                 vent_dir = self.data[dk].get("vent_direction", 0)
-                meteo_dict["wind"].append("%2.0f %03d" % (vent_moy, vent_dir))
+                if vent_moy >= 100:
+                    meteo_dict["wind"].append("%3.0f%03d" % (vent_moy, vent_dir))
+                else:
+                    meteo_dict["wind"].append("%2.0f %03d" % (vent_moy, vent_dir))
+                vent_raf = self.data[dk].get("vent_rafales", 0)
+                neige = self.data[dk].get("risque_neige", False)
+                humidite = self.data[dk].get("humidite", 0)
+                if neige:
+                    neige_char = "*"
+                else:
+                    neige_char = " "
+                if vent_raf >= 100:
+                    meteo_dict["gust"].append("%3.0f%s%2.0f" % (vent_moy, neige_char, round(humidite, 0)))
+                else:
+                    meteo_dict["gust"].append("%2.0f %s%2.0f" % (vent_moy, neige_char, round(humidite, 0)))
                 if len(meteo_dict["hour"]) == 4:
                     break
         return meteo_dict

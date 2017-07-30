@@ -27,7 +27,7 @@ METEO_LONGITUDE = 7.1042904
 def main(argv):
     meteo = papiClock.Meteo(METEO_LATITUDE, METEO_LONGITUDE)
     meteo.getInfo()
-    while meteo.result_info_climat is None:
+    while meteo.data_available is False:
         time.sleep(1)
     now = datetime.datetime(2017, 8, 1, 10, 59)
     meteo_dict = meteo.getMeteo(now)
