@@ -72,6 +72,7 @@ class Meteo(object):
                 elif k == "source":
                     pass
                 elif k == "model_run":
+                    self.previous_run_number = self.run_number
                     self.run_number = int(v)
                 else:
                     ts = datetime.datetime.strptime(k, "%Y-%m-%d %H:%M:%S")
