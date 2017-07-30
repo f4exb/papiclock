@@ -130,8 +130,9 @@ class Meteo(object):
                 temp = self.data[dk].get("temperature", 0)
                 pluie = self.data[dk].get("pluie", 0)
                 if pluie >= 100:
-                    pluie = 99
-                meteo_dict["temp"].append("%+2.0f %2.0f" % (temp, round(pluie, 0)))
+                    meteo_dict["temp"].append("%+2.0f%3.0f" % (temp, round(pluie, 0)))
+                else:
+                    meteo_dict["temp"].append("%+2.0f %2.0f" % (temp, round(pluie, 0)))
                 vent_moy = self.data[dk].get("vent_moyen", 0)
                 vent_dir = self.data[dk].get("vent_direction", 0)
                 if vent_moy >= 100:

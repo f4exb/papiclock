@@ -51,6 +51,8 @@ BLACK = 0
 CLOCK_LATITUDE = 43.5764327
 CLOCK_LONGITUDE = 7.1042904
 
+# install DejaVu fonts with Debian/Raspbian packages fonts-dejavu-core or fontconfig
+
 #CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
 CLOCK_FONT_FILE = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
 
