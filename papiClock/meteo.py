@@ -38,7 +38,6 @@ class Meteo(object):
         self.data = {}
         
     def getInfoWorker(self, url):
-        print(url)
         #result = urllib2.urlopen(self.info_climat.url).read()
         time.sleep(1)
         self.result_info_climat = test.METEO_TEST_RESULT
@@ -118,7 +117,6 @@ class Meteo(object):
         meteo_dict["wind"] = []
         for dk in date_keys:
             if dk > now - datetime.timedelta(hours=3):
-                print(dk, self.data[dk])
                 if len(meteo_dict["hour"]) == 0 and self.previous_run_number != self.run_number:
                     meteo_dict["hour"].append(dk.strftime("%H:%M*"))
                 else:
