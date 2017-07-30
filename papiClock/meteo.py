@@ -20,7 +20,7 @@
 
 import urllib2, urllib, json
 import threading, time, datetime
-import test
+import test, logger
 
 METEO_BASE_URL = "http://www.infoclimat.fr/public-api/gfs/json?_ll={lat:.6f},{lon:.6f}&_auth=AhhRRlIsAyFVeFZhA3UHLlM7BDFaLAIlAn4DYFs%2BUy5SOQVkD29RN14wUy4BLlZgUXxQMwA7AjJROlIqAXMEZQJoUT1SOQNkVTpWMwMsByxTfQRlWnoCJQJpA2ZbKFMyUjMFaQ9yUTFeNFMzAS9WYFFjUDIAIAIlUTNSMAFsBGYCYlE1UjUDZVU%2FVjMDLAcsU2UEbVpiAmkCYANiWz5TOVI5BWgPOVE3XmVTMwEvVmRRa1A3ADYCPVE1UjQBZQR4An5RTFJCA3xVelZ2A2YHdVN9BDFaOwJu&_c=3f9569aaf189f4574d6c65e2f9ae66f0"
 
@@ -38,10 +38,11 @@ class Meteo(object):
         self.data = {}
         
     def getInfoWorker(self, url):
+        zlog = logger.getLogger()
         #result = urllib2.urlopen(self.info_climat.url).read()
         time.sleep(1)
         self.result_info_climat = test.METEO_TEST_RESULT
-        print("%s: Meteo.getInfoWorker: Got result" % __file__)
+        zlog.logger.info("Got result")
         self.parseInfo()
         self.data_available = True
 
@@ -50,16 +51,17 @@ class Meteo(object):
         t.start()
         
     def parseInfo(self):
+        zlog = logger.getLogger()
         http_rc = self.result_info_climat.get("request_state", 0)
         if http_rc == 200:
             msg_rc = self.result_info_climat.get("message", "KO")
             if msg_rc == "OK":
-                print("%s: Meteo.parseInfo: request OK" % __file__)
+                zlog.logger.info("request OK")
             else:
-                print("%s: Meteo.parseInfo: message error %s" % (__file__, message_rc))
+                zlog.logger.error("message error %s" % message_rc)
                 return
         else:
-            print("%s: Meteo.parseInfo: request error %d" % (__file__, http_rc))
+            zlog.logger.error("request error %d" % http_rc)
             return;
         for k, v in self.result_info_climat.iteritems():
             try:
@@ -74,17 +76,19 @@ class Meteo(object):
                 elif k == "model_run":
                     self.previous_run_number = self.run_number
                     self.run_number = int(v)
+                    zlog.logger.info("Run number %d", self.run_number)
                 else:
                     ts = datetime.datetime.strptime(k, "%Y-%m-%d %H:%M:%S")
                     self.data[ts] = self.parseItem(ts, v)
             except ValueError:
-                print("%s: Meteo.parseInfo: invalid value %s at key %s" % (__file__, v, k))
+                zlog.logger.error("invalid value %s at key %s" % (v, k))
                 pass
             except Exception as e:
-                print("%s: Meteo.parseInfo: Exception %s at key %s" % (__file__, str(e), k))
+                zlog.logger.error("Exception %s at key %s" % (str(e), k))
                 pass
         
     def parseItem(self, ts, info):
+        zlog = logger.getLogger()        
         meteo_info = {}
         for k, v in info.iteritems():
             try:
@@ -105,7 +109,7 @@ class Meteo(object):
                 elif k == "humidite":
                      meteo_info["humidite"] = v["2m"]
             except Exception as e:
-                print("%s: Meteo.parseItem: Date %s Exception %s at key %s" % (__file__, ts, str(e), k))
+                zlog.logger.error("Date %s Exception %s at key %s" % (ts, str(e), k))
                 pass
         return meteo_info
                 
