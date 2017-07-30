@@ -50,11 +50,12 @@ def format_date(now):
 
 def meteo_test():
     meteo_dict = {}
-    meteo_dict["items"] = ["hour", "pres", "temp", "wind"]
+    meteo_dict["items"] = ["hour", "pres", "temp", "wind", "gust"]
     meteo_dict["hour"] = ["14:00*","17:00 ","20:00 ","23:00 "]
     meteo_dict["pres"] = ["1015.7","1016.1","1015.3","1014.7"]
     meteo_dict["temp"] = ["+30  0","+31  0","+30  0","+28  0"]
-    meteo_dict["wind"] = ["17 335"," 5 330"," 5 310", " 7 310"]
+    meteo_dict["wind"] = ["17 335"," 5 330"," 5 310", "117310"]
+    meteo_dict["gust"] = ["27  35","15  50"," 7 *67", "121 61"]
     return meteo_dict
 
 def main(argv):

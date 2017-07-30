@@ -28,7 +28,7 @@ class ClockDims:
         self.date_y = self.clock_y + self.clock_font_size + self.clock_interline
         self.sep_y = self.date_y + self.date_font_size
         self.meteo_y = []
-        for i in range(4):
+        for i in range(5):
             self.meteo_y.append(self.clock_font_size + self.date_font_size + self.clock_interline + i*self.meteo_font_size)
         self.meteo_x = []    
         for i in range(4):
