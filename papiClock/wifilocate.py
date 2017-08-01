@@ -19,8 +19,9 @@ import subprocess
 import json, requests
 import logger
 
-# Create googlekey.py inside papiClock package with a single line:
+# Create googlekey.py inside papiClock package with a single line with your Google Maps geolocation API key:
 # KEY=<YOUR_API_KEY>
+# (See: https://developers.google.com/maps/documentation/geolocation/intro)
 import googlekey
 
 cellNumberRe = re.compile(r"^Cell\s+(?P<cellnumber>.+)\s+-\s+Address:\s(?P<mac>.+)$")
@@ -36,7 +37,6 @@ regexps = [
 
 # Runs the comnmand to scan the list of networks.
 # Must run as super user.
-# Does not specify a particular device, so will scan all network devices.
 def scan(interface='wlan0'):
     cmd = ["iwlist", interface, "scan"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -59,6 +59,7 @@ def parse(content):
                     cells[-1].update(result.groupdict())
     return cells
 
+# Encapsulates WiFi scan and call to Google Maps API
 class WifiLocate:
     def __init__(self, interface='wlan0'):
         self.lat = 0
