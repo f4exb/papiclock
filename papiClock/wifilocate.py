@@ -18,6 +18,9 @@ import re
 import subprocess
 import json, requests
 import logger
+
+# Create googlekey.py inside papiClock package with a single line:
+# KEY=<YOUR_API_KEY>
 import googlekey
 
 cellNumberRe = re.compile(r"^Cell\s+(?P<cellnumber>.+)\s+-\s+Address:\s(?P<mac>.+)$")

@@ -11,10 +11,10 @@
 # governing permissions and limitations under the License.
 
 import sys
-from papiClock import wifilocate
+import papiClock
 
 def main(argv):
-    geoloc = wifilocate.WifiLocate()
+    geoloc = papiClock.WifiLocate()
     geoloc.locate()
 
 # main
