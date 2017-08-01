@@ -21,6 +21,7 @@
 
 import os
 import sys
+import argparse
 
 from PIL import Image
 from PIL import ImageDraw
@@ -30,26 +31,28 @@ import time
 from papirus import Papirus
 import papiClock
 
+LOGGER = papiClock.logger.getLogger()
+
 # Check EPD_SIZE is defined
 EPD_SIZE=0.0
 if os.path.exists('/etc/default/epd-fuse'):
     execfile('/etc/default/epd-fuse')
 if EPD_SIZE == 0.0:
-    print("Please select your screen size by running 'papirus-config'.")
+    LOGGER.logger.error("Please select your screen size by running 'papirus-config'.")
     sys.exit()
 
 # Running as root only needed for older Raspbians without /dev/gpiomem
 if not (os.path.exists('/dev/gpiomem') and os.access('/dev/gpiomem', os.R_OK | os.W_OK)):
     user = os.getuid()
     if user != 0:
-        print("Please run script as root")
+        LOGGER.logger.error("Please run script as root")
         sys.exit()
 
 WHITE = 1
 BLACK = 0
 
-CLOCK_LATITUDE = 43.5764327
-CLOCK_LONGITUDE = 7.1042904
+CLOCK_LATITUDE = 43.5804
+CLOCK_LONGITUDE = 7.1251
 
 # install DejaVu fonts with Debian/Raspbian packages fonts-dejavu-core or fontconfig
 
@@ -65,17 +68,47 @@ METEO_FONT_FILE  = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
 CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
 
-def main(argv):
+def main():
 
-    """main program - draw and display time and date"""
+    """main program - draw and display time, date and weather information at current location"""
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-I", "--interface", help="wireless network interface", default="wlan0")
+    parser.add_argument("-L", "--latitude", help="latitude of point of interest", type=float)
+    parser.add_argument("-l", "--longitude", help="longitude of point of interest", type=float)
+    args = parser.parse_args()
+
+    lat = None
+    lon = None
+
+    if args.latitude and args.longitude:
+        LOGGER.logger.info("Latitude %f and Longitude %f given as arguments" %(args.latitude, args.longitude))
+        lat = args.latitude
+        lon = args.longitude
+    else:
+        geoloc = papiClock.WifiLocate()
+        if geoloc.scan(interface=args.interface):
+            geoloc.locate()
+            if geoloc.radius:
+                LOGGER.logger.info("Latitude %f and Longitude %f with error radius of %f m obtained from WiFi geolocation" % (geoloc.lat, geoloc.lon, geoloc.radius))
+                lat = geoloc.lat
+                lon = geoloc.lon
+            else:
+                LOGGER.logger.info("cannot geolocate")
+        else:   
+            LOGGER.logger.info("no results to WiFi scan")
+
+    if lat is None:
+        LOGGER.logger.warning("No location information. Defaulting to latitude %f and longitude %f" % (CLOCK_LATITUDE, CLOCK_LONGITUDE))
+        lat = CLOCK_LATITUDE
+        lon = CLOCK_LONGITUDE
 
     papirus = Papirus(rotation = int(argv[0]) if len(sys.argv) > 1 else 0)
-
-    print('panel = {p:s} {w:d} x {h:d}  version={v:s} COG={g:d} FILM={f:d}'.format(p=papirus.panel, w=papirus.width, h=papirus.height, v=papirus.version, g=papirus.cog, f=papirus.film))
-
+    LOGGER.logger.info('panel = {p:s} {w:d} x {h:d}  version={v:s} COG={g:d} FILM={f:d}'.format(p=papirus.panel, w=papirus.width, h=papirus.height, v=papirus.version, g=papirus.cog, f=papirus.film))
     papirus.clear()
 
-    demo(papirus)
+    run(papirus, lat, lon)
+
 
 def format_time(now):
     return '{h:02d}:{m:02d}:{s:02d}'.format(h=now.hour, m=now.minute, s=now.second)
@@ -92,7 +125,7 @@ def meteo_test():
     meteo_dict["wind"] = ["17 335","05 330","05 310", "07 310"]
     return meteo_dict
 
-def demo(papirus):
+def run(papirus, lat, lon):
     """simple partial update demo - draw a clock"""
 
     # initially set all white background
@@ -115,7 +148,7 @@ def demo(papirus):
     previous_day = 0
     
     # fetch initial meteo data
-    meteo = papiClock.Meteo(CLOCK_LATITUDE, CLOCK_LONGITUDE)
+    meteo = papiClock.Meteo(lat, lon)
     meteo.getInfo()
     meteo_init = True
     
@@ -146,9 +179,9 @@ def demo(papirus):
                 meteo_dict = meteo.getMeteo(now)
                 draw.rectangle((cd.left_margin, cd.sep_y, width - 2, height - 2), fill=WHITE, outline=WHITE) # prepare meteo redraw
                 for ix in range(len(meteo_dict["hour"])):
-                    zlog.logger.info("Meteo item #%d" % ix)
+                    LOGGER.logger.info("Meteo item #%d" % ix)
                     for iy,it in enumerate(meteo_dict["items"]):
-                        zlog.logger.info("Meteo: %s: %s" % (meteo_dict["items"][iy], meteo_dict[it][ix]))
+                        LOGGER.logger.info("Meteo: %s: %s" % (meteo_dict["items"][iy], meteo_dict[it][ix]))
                         draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][ix], fill=BLACK, font=meteo_font)
                 draw.line((0, cd.sep_y, width - 1, cd.sep_y), fill=BLACK   )
                 for i in range(1,4):
@@ -166,11 +199,8 @@ def demo(papirus):
 
 # main
 if "__main__" == __name__:
-    if len(sys.argv) < 1:
-        sys.exit('usage: {p:s}'.format(p=sys.argv[0]))
-
     try:
-        main(sys.argv[1:])
+        main()
     except KeyboardInterrupt:
         sys.exit('interrupted')
         pass

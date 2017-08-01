@@ -38,6 +38,7 @@ regexps = [
 # Runs the comnmand to scan the list of networks.
 # Must run as super user.
 def scan(interface='wlan0'):
+    zlog = logger.getLogger() 
     cmd = ["iwlist", interface, "scan"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     scantext = proc.stdout.read().decode('utf-8')
@@ -61,7 +62,7 @@ def parse(content):
 
 # Encapsulates WiFi scan and call to Google Maps API
 class WifiLocate:
-    def __init__(self, interface='wlan0'):
+    def __init__(self):
         self.lat = 0
         self.lon = 0
         self.radius = None
@@ -71,11 +72,15 @@ class WifiLocate:
         zlog = logger.getLogger()
         try:
             scantext = scan(interface)
-            self.cells = parse(scantext)
-            zlog.logger.info(self.cells)
+	    if scantext:
+                self.cells = parse(scantext)
+                zlog.logger.info(self.cells)
+                return True
+            else:
+                return False
         except Exception as e:
-            zlog.logger.error("Exception %s in WifiLocate constructor" % str(e))
-            pass
+            zlog.logger.error("Exception %s in WiFi scanner" % str(e))
+            return False
         
     def locate(self):
         zlog = logger.getLogger()

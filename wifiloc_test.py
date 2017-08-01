@@ -11,19 +11,31 @@
 # governing permissions and limitations under the License.
 
 import sys
+import argparse
 import papiClock
 
-def main(argv):
-    geoloc = papiClock.WifiLocate()
-    geoloc.scan()
-    geoloc.locate()
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-I", "--interface", help="wireless network interface", default="wlan0")
+    parser.add_argument("-L", "--latitude", help="latitude of point of interest", type=float)
+    parser.add_argument("-l", "--longitude", help="longitude of point of interest", type=float)
+    args = parser.parse_args()    
+
+    if args.latitude and args.longitude:
+	print("ll=%f,%f" %(args.latitude, args.longitude))
+    else:
+        geoloc = papiClock.WifiLocate()
+        if geoloc.scan(interface=args.interface):
+            geoloc.locate()
+        if geoloc.radius:
+            print("ll=%f,%f" % (geoloc.lat, geoloc.lon))
+        else:
+            print("cannot geolocate")
 
 # main
 if "__main__" == __name__:
-    if len(sys.argv) < 1:
-        sys.exit('usage: {p:s}'.format(p=sys.argv[0]))
     try:
-        main(sys.argv[1:])
+        main()
     except KeyboardInterrupt:
         sys.exit('interrupted')
         pass
