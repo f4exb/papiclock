@@ -161,6 +161,10 @@ Starting hour of the 3 hour period (local time)
 
 This is the pressure at sea level in hPa
 
+<h3>Temperature at 2m altitude</h3>
+
+This is the temperature at 2m altitude in degres Celsius
+
 <h3>Rainfall within 3h period</h3>
 
 This is the rainfall in mm during the given 3 hour period. Expands to 3 characters for values of 100 mm or more.
@@ -171,7 +175,7 @@ Average wind speed in km/h. Expands to 3 characters for values of 100 km/h or mo
 
 <h3>Wind direction</h3>
 
-This is the wind direction in degrees
+This is the wind direction in degrees (0: North, 90: East, 180: South, 270: West).
 
 <h3>Wind gusts speed</h3>
 
