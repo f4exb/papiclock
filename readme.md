@@ -23,7 +23,7 @@ It still misses an outer case but you get the idea...
 
 <h1>Prerequisites</h1>
 
-  - A PaPiRus hat installed and working thanks to the [PaPiRus Python library](https://github.com/PiSupply/PaPiRus) already mentioned. Please note that this is for Python 2 (2.7) only.
+  - A PaPiRus hat installed and working thanks to the [PaPiRus Python library](https://github.com/PiSupply/PaPiRus) already mentioned. Please note that this is for Python 2 (2.7) only. Although the sofware should adapt the font size depending on the size of the screen for better results choose the largest 2.7" screen.
   - A WiFi dongle or a working on board WiFi if you are using the Raspberry Pi 3
   - An Internet connection
   - A Google Map API key (see [here](https://developers.google.com/maps/documentation/geolocation/intro)) for geolocation with WiFi
