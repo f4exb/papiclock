@@ -39,9 +39,10 @@ class Meteo(object):
         
     def getInfoWorker(self, url):
         zlog = logger.getLogger()
-        #result = urllib2.urlopen(self.info_climat.url).read()
-        time.sleep(1)
-        self.result_info_climat = test.METEO_TEST_RESULT
+        result = urllib2.urlopen(self.info_climat.url).read()
+        self.result_info_climat = json.loads(result)
+        #time.sleep(1)
+        #self.result_info_climat = test.METEO_TEST_RESULT
         zlog.logger.info("Got result")
         self.parseInfo()
         self.data_available = True

@@ -29,6 +29,7 @@ def main(argv):
     meteo.getInfo()
     while meteo.data_available is False:
         time.sleep(1)
+        print("wait")
     now = datetime.datetime(2017, 8, 1, 10, 59)
     meteo_dict = meteo.getMeteo(now)
     lines = []
