@@ -61,16 +61,20 @@ def parse(content):
 
 class WifiLocate:
     def __init__(self, interface='wlan0'):
+        self.lat = 0
+        self.lon = 0
+        self.radius = None
+        self.cells = []
+        
+    def scan(self, interface='wlan0'):
         zlog = logger.getLogger()
         try:
             scantext = scan(interface)
             self.cells = parse(scantext)
             zlog.logger.info(self.cells)
-            self.lat = 0
-            self.lon = 0
-            self.radius = None
         except Exception as e:
             zlog.logger.error("Exception %s in WifiLocate constructor" % str(e))
+            pass
         
     def locate(self):
         zlog = logger.getLogger()
@@ -86,6 +90,7 @@ class WifiLocate:
                 request["wifiAccessPoints"].append(ap)
             except Exception as e:
                 zlog.logger.error("Exception %s for cell %s" % (str(e), str(cell)))
+                pass
         try:
             googleurl = "https://www.googleapis.com/geolocation/v1/geolocate?key=%s" % googlekey.KEY
             r = requests.post(googleurl, json=request)
@@ -94,8 +99,9 @@ class WifiLocate:
                 self.radius = response["accuracy"]
                 self.lat = response["location"]["lat"]
                 self.lon = response["location"]["lng"]
-                zlog.logger.info("Google Maps replied: lat=%f, lon=%f, radius=%f" % (self.lat, self.lon, self.radius))
+                zlog.logger.info("Google Maps replied: ll=%f,%f radius=%f" % (self.lat, self.lon, self.radius))
             else:
                 zlog.logger.error("Google Maps API returned code %d" % r.status_code)
         except Exception as e:
             zlog.logger.error("Exception %s occured while processing Google Maps API" % str(e))
+            pass

@@ -15,6 +15,7 @@ import papiClock
 
 def main(argv):
     geoloc = papiClock.WifiLocate()
+    geoloc.scan()
     geoloc.locate()
 
 # main
