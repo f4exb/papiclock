@@ -95,9 +95,13 @@ def main(argv):
     draw.text((cd.left_margin + 4, cd.clock_y), format_time(now), fill=BLACK, font=clock_font) # time
   
     draw.rectangle((cd.left_margin, cd.sep_y, width - 2, height - 2), fill=WHITE, outline=WHITE) # prepare meteo redraw
+    meteo_log = [["" for x in range(len(meteo_dict["hour"]))] for y in range(len(meteo_dict["items"]))]
     for ix in range(len(meteo_dict["hour"])):
         for iy,it in enumerate(meteo_dict["items"]):
             draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][ix], fill=BLACK, font=meteo_font)
+            meteo_log[iy][ix] = meteo_dict[it][ix]
+    for l in meteo_log:
+        print('|'.join(l))
     draw.line((0, cd.sep_y, width - 1, cd.sep_y), fill=BLACK   )
     for i in range(1,4):
         draw.line((cd.meteo_x[i], cd.sep_y, cd.meteo_x[i], height - 1), fill=BLACK)
