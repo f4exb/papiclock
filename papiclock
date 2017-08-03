@@ -178,7 +178,7 @@ def run(papirus, lat, lon):
                 meteo_init = False
                 meteo_dict = meteo.getMeteo(now)
                 draw.rectangle((cd.left_margin, cd.sep_y, width - 2, height - 2), fill=WHITE, outline=WHITE) # prepare meteo redraw
-                meteo_log = [["" for x in range(len(meteo_dict["hour"]))] for y in range(len(meteo_dict["items"]))]
+                meteo_log = [["" for y in range(len(meteo_dict["hour"]))] for x in range(len(meteo_dict["items"]))]
                 for ix in range(len(meteo_dict["hour"])):
                     for iy,it in enumerate(meteo_dict["items"]):
                         draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][ix], fill=BLACK, font=meteo_font)
