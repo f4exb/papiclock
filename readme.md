@@ -184,3 +184,24 @@ This is the speed of wind gusts in km/h. Expands to 3 characters for values of 1
 <h3>Humidity</h3>
 
 This is the humidity in %. It is prefixed with a `*` if there is a risk of snow
+
+<h1>REST API</h1>
+
+When papiclock is started a mini server is started to serve a REST API to remotely get data from the papiclock. By default it listens on port 8080 but this can be changed with the `--port` or `-p` parameter.
+
+Available APIs are
+
+  - /meteo: gets meteorogical information (GET)
+  
+<h2>meteo</h2>
+
+This api returns the meteo information that has been obtained from Infoclimat. This can serve as a proxy to minimize access to Infoclimat API. As it returns the full data from Infoclimat more time slices and more items are available than on the PaPiClock display.
+
+Response is in JSON form with the following keys:
+
+  - update_ts: Unix epoch timestamp of last update i.e. initial data or last new model run from Infoclimat
+  - run_number: Infoclimat model run number
+  - geoloc: geolocalisation information on which the Infoclimat information is based on
+    - lat: latitude in decimal degrees positive North
+    - lon: longitude in decimal degrees positive East
+  - data: copy of the JSON data obtained from Infoclimat
