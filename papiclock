@@ -67,8 +67,8 @@ METEO_FONT_FILE  = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
 CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
 
-def apiWorker():
-    papiClock.apiserver.run()
+def apiWorker(port):
+    papiClock.apiserver.run(port=port)
 
 
 def main():
@@ -79,6 +79,7 @@ def main():
     parser.add_argument("-I", "--interface", help="wireless network interface", default="wlan0")
     parser.add_argument("-L", "--latitude", help="latitude of point of interest", type=float)
     parser.add_argument("-l", "--longitude", help="longitude of point of interest", type=float)
+    parser.add_argument("-p", "--port", help="port for the rest API", type=int, default=8080)
     args = parser.parse_args()
 
     lat = None
@@ -114,7 +115,7 @@ def main():
         papiClock.apiserver.meteo_dict["geoloc"]["lat"] = lat
         papiClock.apiserver.meteo_dict["geoloc"]["lon"] = lon
 
-        api_th = threading.Thread(target=apiWorker)
+        api_th = threading.Thread(target=apiWorker, args=(args.port,))
         api_th.start() # Start REST API server 
 
         run(papirus, lat, lon)
@@ -193,6 +194,7 @@ def run(papirus, lat, lon):
             if meteo.result_available:
                 if meteo.previous_run_number != meteo.run_number:
                     papiClock.apiserver.meteo_dict["update_ts"] = time.mktime(now.timetuple()) # Unix timestamp of last change (now)
+                papiClock.apiserver.meteo_dict["run_number"] = meteo.run_number
                 papiClock.apiserver.meteo_dict["data"] = meteo.result_info_climat
             if meteo.data_available:
                 meteo_init = False

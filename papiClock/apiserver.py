@@ -3,6 +3,7 @@ import web, json
 
 meteo_dict = {
     "update_ts" : 0,
+    "run_number": 0,
     "geoloc" : {
         "lat": 0,
         "lon": 0
