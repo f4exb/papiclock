@@ -32,6 +32,7 @@ class Meteo(object):
     def __init__(self, latitude, longitude):
         self.info_climat = InfoClimat(latitude, longitude)
         self.result_info_climat = None
+        self.result_available = False
         self.data_available = False
         self.run_number = 0
         self.previous_run_number = 0
@@ -53,6 +54,7 @@ class Meteo(object):
         
     def parseInfo(self):
         zlog = logger.getLogger()
+        self.result_available = False
         http_rc = self.result_info_climat.get("request_state", 0)
         if http_rc == 200:
             msg_rc = self.result_info_climat.get("message", "KO")
@@ -63,7 +65,8 @@ class Meteo(object):
                 return
         else:
             zlog.logger.error("request error %d" % http_rc)
-            return;
+            returin;
+        self.result_available = True
         for k, v in self.result_info_climat.iteritems():
             try:
                 if k == "request_state":
