@@ -1,0 +1,226 @@
+#!/usr/bin/env python
+
+# Copyright 2013-2015 Pervasive Displays, Inc.
+# Copyright 2017 Edouard Griffiths, F4EXB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at:
+#
+#   http:#www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+# express or implied.  See the License for the specific language
+# governing permissions and limitations under the License.
+
+# Many thanks to InfoClimat: http://www.infoclimat.fr
+# InfoClimat is a non profit association of weather enthusiasts making
+# their weather prediction API freely available
+
+import os, sys, threading
+import argparse
+
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
+from datetime import datetime
+import time
+import pygame
+import papiClock
+
+LOGGER = papiClock.logger.getLogger()
+
+WHITE = 1
+BLACK = 0
+
+white = 255, 255, 255
+black = 0, 0, 0
+
+
+CLOCK_LATITUDE = 43.5804
+CLOCK_LONGITUDE = 7.1251
+
+# install DejaVu fonts with Debian/Raspbian packages fonts-dejavu-core or fontconfig
+
+#CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
+CLOCK_FONT_FILE = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
+
+#DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
+DATE_FONT_FILE = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf'
+
+#METEO_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
+METEO_FONT_FILE  = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
+
+CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
+CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
+
+def apiWorker(port):
+    papiClock.apiserver.run(port=port)
+
+
+def main():
+
+    """main program - draw and display time, date and weather information at current location"""
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-I", "--interface", help="wireless network interface", default="wlan0")
+    parser.add_argument("-L", "--latitude", help="latitude of point of interest", type=float)
+    parser.add_argument("-l", "--longitude", help="longitude of point of interest", type=float)
+    parser.add_argument("-p", "--port", help="port for the rest API", type=int, default=8080)
+    parser.add_argument("-f", "--fbdevice", help="framebuffer device", default="/dev/fb0")
+    args = parser.parse_args()
+
+    lat = None
+    lon = None
+
+    if args.latitude and args.longitude:
+        LOGGER.logger.info("Latitude %f and Longitude %f given as arguments" %(args.latitude, args.longitude))
+        lat = args.latitude
+        lon = args.longitude
+    else:
+        geoloc = papiClock.WifiLocate()
+        if geoloc.scan(interface=args.interface):
+            geoloc.locate()
+            if geoloc.radius:
+                LOGGER.logger.info("Latitude %f and Longitude %f with error radius of %f m obtained from WiFi geolocation" % (geoloc.lat, geoloc.lon, geoloc.radius))
+                lat = geoloc.lat
+                lon = geoloc.lon
+            else:
+                LOGGER.logger.info("cannot geolocate")
+        else:   
+            LOGGER.logger.info("no results to WiFi scan")
+
+    if lat is None:
+        LOGGER.logger.warning("No location information. Defaulting to latitude %f and longitude %f" % (CLOCK_LATITUDE, CLOCK_LONGITUDE))
+        lat = CLOCK_LATITUDE
+        lon = CLOCK_LONGITUDE
+
+    os.environ["SDL_FBDEV"] = ags.fbdevice
+    pygame.init()
+    size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+    screen = pygame.display.set_mode(size)    
+    
+    LOGGER.logger.info('panel = {w:d} x {h:d}'.format(w=size[0], h=size[1]))
+
+    try:
+        papiClock.apiserver.meteo_dict["geoloc"]["lat"] = lat
+        papiClock.apiserver.meteo_dict["geoloc"]["lon"] = lon
+
+        api_th = threading.Thread(target=apiWorker, args=(args.port,))
+        api_th.start() # Start REST API server 
+
+        run(size, screen, lat, lon)
+
+    except Exception as e:
+        LOGGER.logger.error("Ended with exception %s", str(e))
+        papiClock.apiserver.stop()
+        api_th.join()
+        raise
+
+
+def format_time(now):
+    return '{h:02d}:{m:02d}:{s:02d}'.format(h=now.hour, m=now.minute, s=now.second)
+
+def format_date(now):
+    return '{dow} {d:02d} {moy}'.format(dow=CLOCK_WEEKDAYS[now.weekday()], d=now.day, moy=CLOCK_MONTHS[now.month - 1])
+
+def meteo_test():
+    meteo_dict = {}
+    meteo_dict["items"] = ["hour", "pres", "temp", "wind"]
+    meteo_dict["hour"] = ["14:00","17:00","20:00","23:00"]
+    meteo_dict["pres"] = ["1015.7","1016.1","1015.3","1014.7"]
+    meteo_dict["temp"] = ["30","31","30","28"]
+    meteo_dict["wind"] = ["17 335","05 330","05 310", "07 310"]
+    return meteo_dict
+
+def display_image(screen, image):
+    image_mode = image.mode
+    image_size = image.size
+    image_data = image.tostring()
+    pygame_image = pygame.image.fromstring(image_data, image_size, image_mode)
+    image_rect = pygame_image.get_rect()
+    screen.fill(black)
+    screen.blit(pygame_image, image_rect)
+    pygame.display.flip()
+
+def run(size, screen, lat, lon):
+    """simple partial update demo - draw a clock"""
+
+    # initially set all white background
+    image = Image.new('1', size, WHITE)
+
+    # prepare for drawing
+    draw = ImageDraw.Draw(image)
+    width, height = image.size
+
+    # get and init the clock constant dimensions
+    cd = papiClock.ClockDims(width, height)
+
+    clock_font = ImageFont.truetype(CLOCK_FONT_FILE, cd.clock_font_size)
+    date_font = ImageFont.truetype(DATE_FONT_FILE, cd.date_font_size)
+    meteo_font = ImageFont.truetype(METEO_FONT_FILE, cd.meteo_font_size)
+
+    # clear the display buffer
+    draw.rectangle((0, 0, width, height), fill=WHITE, outline=WHITE)
+    previous_second = 0
+    previous_day = 0
+    
+    # fetch initial meteo data
+    meteo = papiClock.Meteo(lat, lon)
+    meteo.getInfo()
+    meteo_init = True
+    
+    zlog = papiClock.logger.getLogger()
+    
+    while True:
+        while True:
+            now = datetime.today()
+            if now.second != previous_second:
+                break
+            time.sleep(0.1)
+
+        if now.day != previous_day:
+            draw.rectangle((0, 0, width - 1, height - 1), fill=WHITE, outline=BLACK) # outer line
+            draw.text((cd.left_margin, cd.date_y), format_date(now), fill=BLACK, font=date_font) # date
+            previous_day = now.day
+        else:
+            draw.rectangle((cd.left_margin, cd.top_margin, width - cd.left_margin, cd.clock_y + cd.clock_font_size), fill=WHITE, outline=WHITE) # prepare time redraw
+
+        if now.second % 2 == 0:
+            draw.text((cd.left_margin, cd.clock_y), format_time(now), fill=BLACK, font=clock_font) # time
+
+        if now.minute == 50 and now.second == 0:  # fetch meteo data every hour + 50'
+            meteo.getInfo()
+        elif (now.minute == 0 and now.second == 0) or meteo_init: # update meteo display every hour or on start
+            if meteo.result_available:
+                if meteo.previous_run_number != meteo.run_number:
+                    papiClock.apiserver.meteo_dict["update_ts"] = time.mktime(now.timetuple()) # Unix timestamp of last change (now)
+                papiClock.apiserver.meteo_dict["run_number"] = meteo.run_number
+                papiClock.apiserver.meteo_dict["data"] = meteo.result_info_climat
+            if meteo.data_available:
+                meteo_init = False
+                meteo_dict = meteo.getMeteo(now)
+                draw.rectangle((cd.left_margin, cd.sep_y, width - 2, height - 2), fill=WHITE, outline=WHITE) # prepare meteo redraw
+                meteo_log = [["" for y in range(len(meteo_dict["hour"]))] for x in range(len(meteo_dict["items"]))]
+                for ix in range(len(meteo_dict["hour"])):
+                    for iy,it in enumerate(meteo_dict["items"]):
+                        draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][ix], fill=BLACK, font=meteo_font)
+                        meteo_log[iy][ix] = meteo_dict[it][ix]
+                for l in meteo_log:
+                    LOGGER.logger.info("Meteo: %s" % '|'.join(l))
+                draw.line((0, cd.sep_y, width - 1, cd.sep_y), fill=BLACK   )
+                for i in range(1,4):
+                    draw.line((cd.meteo_x[i], cd.sep_y, cd.meteo_x[i], height - 1), fill=BLACK)
+
+        display_image(screen, image) # display image on the panel
+        previous_second = now.second
+
+# main
+if "__main__" == __name__:
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit('interrupted')
+        pass
