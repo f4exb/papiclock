@@ -54,7 +54,7 @@ Of course the key is made up you have to replace with your own.
 
 The most practical is to install as root in `/usr/local` like PaPiRus does. In the cloned repository do:
 
-  - `sudo python setup.py --install`
+  - `sudo python setup.py install`
 
 <h2>Control by supervisor</h2>
 
