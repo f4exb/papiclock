@@ -162,7 +162,7 @@ def run(size, lat, lon):
     width, height = image.size
 
     # get and init the clock constant dimensions
-    cd = papiClock.ClockDims(width, height)
+    cd = papiClock.ClockDims(width*0.9, height*0.9)
 
     clock_font = ImageFont.truetype(CLOCK_FONT_FILE, cd.clock_font_size)
     date_font = ImageFont.truetype(DATE_FONT_FILE, cd.date_font_size)
