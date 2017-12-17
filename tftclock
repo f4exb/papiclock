@@ -19,7 +19,7 @@
 # InfoClimat is a non profit association of weather enthusiasts making
 # their weather prediction API freely available
 
-import os, sys, threading
+import os, sys, threading, signal
 import argparse
 
 from PIL import Image
@@ -52,6 +52,12 @@ METEO_FONT_FILE  = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 CLOCK_WEEKDAYS = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"]
 CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP", "OCT", "NOV", "DEC"]
 
+def signal_handler(signal, frame):
+  LOGGER.logger.info('Signal: {}'.format(signal))
+  sleep(1)
+  pygame.quit()
+  sys.exit(0)
+
 def apiWorker(port):
     papiClock.apiserver.run(port=port)
 
@@ -59,6 +65,9 @@ def apiWorker(port):
 def main():
 
     """main program - draw and display time, date and weather information at current location"""
+
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-I", "--interface", help="wireless network interface", default="wlan0")
