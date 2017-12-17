@@ -103,9 +103,9 @@ def main():
         lon = CLOCK_LONGITUDE
 
     os.environ["SDL_FBDEV"] = args.fbdevice
-    pygame.quit()
     pygame.init()
     size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+    LOGGER.logger.info('About to pygame.display.set_mode')
     screen = pygame.display.set_mode(size, pygame.FULLSCREEN|pygame.NOFRAME, 8)
     
     LOGGER.logger.info('panel = {w:d} x {h:d}'.format(w=size[0], h=size[1]))
