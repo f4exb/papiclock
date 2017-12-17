@@ -32,7 +32,7 @@ import papiClock
 
 LOGGER = papiClock.logger.getLogger()
 
-WHITE = 1
+WHITE = 255
 BLACK = 0
 
 white = 255, 255, 255
@@ -149,7 +149,7 @@ def run(size, screen, lat, lon):
     """simple partial update demo - draw a clock"""
 
     # initially set all white background
-    image = Image.new('1', size, WHITE)
+    image = Image.new('L', size, WHITE)
 
     # prepare for drawing
     draw = ImageDraw.Draw(image)
