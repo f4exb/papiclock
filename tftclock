@@ -32,12 +32,8 @@ import papiClock
 
 LOGGER = papiClock.logger.getLogger()
 
-WHITE = 255
-BLACK = 0
-
-white = 255, 255, 255
-black = 0, 0, 0
-
+WHITE = 255, 255, 255
+BLACK = 0, 0, 0
 
 CLOCK_LATITUDE = 43.5804
 CLOCK_LONGITUDE = 7.1251
@@ -141,7 +137,7 @@ def display_image(screen, image):
     image_data = image.tostring()
     pygame_image = pygame.image.fromstring(image_data, image_size, image_mode)
     image_rect = pygame_image.get_rect()
-    screen.fill(black)
+    screen.fill(WHITE)
     screen.blit(pygame_image, image_rect)
     pygame.display.flip()
 
@@ -149,7 +145,7 @@ def run(size, screen, lat, lon):
     """simple partial update demo - draw a clock"""
 
     # initially set all white background
-    image = Image.new('L', size, WHITE)
+    image = Image.new('RGB', size, WHITE)
 
     # prepare for drawing
     draw = ImageDraw.Draw(image)
