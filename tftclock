@@ -94,9 +94,10 @@ def main():
         lon = CLOCK_LONGITUDE
 
     os.environ["SDL_FBDEV"] = args.fbdevice
+    pygame.quit()
     pygame.init()
     size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-    screen = pygame.display.set_mode(size)    
+    screen = pygame.display.set_mode(size, pygame.FULLSCREEN|pygame.NOFRAME, 8)
     
     LOGGER.logger.info('panel = {w:d} x {h:d}'.format(w=size[0], h=size[1]))
 
@@ -107,7 +108,7 @@ def main():
         api_th = threading.Thread(target=apiWorker, args=(args.port,))
         api_th.start() # Start REST API server 
 
-        run(size, screen, lat, lon)
+        run(size, lat, lon)
 
     except Exception as e:
         LOGGER.logger.error("Ended with exception %s", str(e))
@@ -131,17 +132,17 @@ def meteo_test():
     meteo_dict["wind"] = ["17 335","05 330","05 310", "07 310"]
     return meteo_dict
 
-def display_image(screen, image):
+def display_image(image):
     image_mode = image.mode
     image_size = image.size
     image_data = image.tostring()
     pygame_image = pygame.image.fromstring(image_data, image_size, image_mode)
     image_rect = pygame_image.get_rect()
-    screen.fill(WHITE)
+    screen = pygame.display.get_surface()
     screen.blit(pygame_image, image_rect)
     pygame.display.flip()
 
-def run(size, screen, lat, lon):
+def run(size, lat, lon):
     """simple partial update demo - draw a clock"""
 
     # initially set all white background
@@ -209,7 +210,7 @@ def run(size, screen, lat, lon):
                 for i in range(1,4):
                     draw.line((cd.meteo_x[i], cd.sep_y, cd.meteo_x[i], height - 1), fill=BLACK)
 
-        display_image(screen, image) # display image on the panel
+        display_image(image) # display image on the panel
         previous_second = now.second
 
 # main
