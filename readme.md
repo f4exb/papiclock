@@ -131,8 +131,14 @@ With the configuraion above the log can be browsed in user's home `log` subdirac
   - `-I` or `--interface`: this is the name of the WiFi interface if you use WiFi geolocation (default: `wlan0`)
   - `-L` or `--latitude`: this is the location latitude. If you specify both latitude and longitude then WiFi geolocation is disabled and this location data is used instead 
   - `-l` or `--longitude`: this is the location longitude.
+  - `-p` or `--port`: this is the port number on which the REST API listens
+  - `-f` or `--fbdevice` (tftclock only) this is the framebuffer device (default `/dev/fb0`)
   
 &#9758; if geolocation fails and no latitude and longitude are provided then it fallbacks to the default location hardcoded in the program as `CLOCK_LATITUDE` and `CLOCK_LONGITUDE` which are the coordinates of the center of Antibes, France.
+  
+<h1>Program for TFT displays</h1>
+
+NEW! `tftclock` is a program specific for TFT displays that is otherwise similar to `papiclock` in every way. In the previous installation instructions just replace "papiclock" with "tftclock" and you should be able to get it going exactly the same way. 
   
 <h1>Clock display</h1>
 
