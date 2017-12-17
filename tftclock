@@ -54,7 +54,7 @@ CLOCK_MONTHS   = ["JAN", "FEV", "MAR", "AVR", "MAI", "JUN", "JUL", "AOU", "SEP",
 
 def signal_handler(signal, frame):
   LOGGER.logger.info('Signal: {}'.format(signal))
-  sleep(1)
+  time.sleep(1)
   pygame.quit()
   sys.exit(0)
 
