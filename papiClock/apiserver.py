@@ -24,6 +24,8 @@ app = MyApp(urls, globals())
 
 class web_process_meteo:
     def GET(self):
+        web.header('Access-Control-Allow-Origin', '*')
+        web.header('Access-Control-Allow-Credentials', 'true')
         output = json.dumps(meteo_dict)
         return output
 
