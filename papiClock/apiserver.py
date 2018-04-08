@@ -12,7 +12,7 @@ meteo_dict = {
 }
 
 urls = (
-    '/meteo', 'web_process_meteo'
+    '/api/meteo', 'web_process_meteo'
 )
 
 class MyApp(web.application):
