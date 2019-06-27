@@ -27,7 +27,7 @@ METEO_BASE_URL = "http://www.infoclimat.fr/public-api/gfs/json?_ll={lat:.6f},{lo
 class InfoClimat(object):
     def __init__(self, latitude, longitude):
         self.url = METEO_BASE_URL.format(lat=latitude, lon=longitude)
-    
+
 class Meteo(object):
     def __init__(self, latitude, longitude):
         self.info_climat = InfoClimat(latitude, longitude)
@@ -37,7 +37,7 @@ class Meteo(object):
         self.run_number = 0
         self.previous_run_number = 0
         self.data = {}
-        
+
     def getInfoWorker(self, url):
         zlog = logger.getLogger()
         result = urllib2.urlopen(self.info_climat.url).read()
@@ -51,7 +51,7 @@ class Meteo(object):
     def getInfo(self):
         t = threading.Thread(target=self.getInfoWorker, args=(self.info_climat.url,))
         t.start()
-        
+
     def parseInfo(self):
         zlog = logger.getLogger()
         self.result_available = False
@@ -65,7 +65,7 @@ class Meteo(object):
                 return
         else:
             zlog.logger.error("request error %d" % http_rc)
-            returin;
+            return
         self.result_available = True
         for k, v in self.result_info_climat.iteritems():
             try:
@@ -90,9 +90,9 @@ class Meteo(object):
             except Exception as e:
                 zlog.logger.error("Exception %s at key %s" % (str(e), k))
                 pass
-        
+
     def parseItem(self, ts, info):
-        zlog = logger.getLogger()        
+        zlog = logger.getLogger()
         meteo_info = {}
         for k, v in info.iteritems():
             try:
@@ -116,7 +116,7 @@ class Meteo(object):
                 zlog.logger.error("Date %s Exception %s at key %s" % (ts, str(e), k))
                 pass
         return meteo_info
-                
+
     def getMeteo(self, now):
         date_keys = self.data.keys()
         date_keys.sort()
@@ -132,7 +132,7 @@ class Meteo(object):
                 if len(meteo_dict["hour"]) == 0 and self.previous_run_number != self.run_number:
                     meteo_dict["hour"].append(dk.strftime("%H:%M*"))
                 else:
-                    meteo_dict["hour"].append(dk.strftime("%H:%M "))                    
+                    meteo_dict["hour"].append(dk.strftime("%H:%M "))
                 pres = self.data[dk].get("pression", 0)
                 meteo_dict["pres"].append("%.1f" % pres)
                 temp = self.data[dk].get("temperature", 0)
@@ -157,4 +157,4 @@ class Meteo(object):
                 if len(meteo_dict["hour"]) == 4:
                     break
         return meteo_dict
-                
+
