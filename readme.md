@@ -30,6 +30,14 @@ It still misses an outer case but you get the idea...
   - `sudo apt-get install fonts-dejavu-core` to get the font used for the clock
   - `sudo apt-get install supervisor` for a convenient way to do clock start/stop/restart as a daemon controlled by supervisor (see next)
   - `sudo apt-get install ntp` to install NTP however it should come pre-installed with Raspbian
+  - `sudo apt-get install python-pil python-requests` to install basic Python dependencies
+
+Install Pygame
+
+  - `sudo apt-get -y install python-pip`
+  - `sudo apt-get -y install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev`
+  - `sudo apt-get -y install libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev`
+  - `sudo pip install pygame` 
   
 <h1>Installation</h1>
 
