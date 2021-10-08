@@ -144,7 +144,7 @@ def meteo_test():
 def display_image(image):
     image_mode = image.mode
     image_size = image.size
-    image_data = image.tostring()
+    image_data = image.tobytes()
     pygame_image = pygame.image.fromstring(image_data, image_size, image_mode)
     image_rect = pygame_image.get_rect()
     screen = pygame.display.get_surface()
