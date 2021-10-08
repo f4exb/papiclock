@@ -38,6 +38,10 @@ Install Pygame
   - `sudo apt-get -y install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev`
   - `sudo apt-get -y install libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev`
   - `sudo pip install pygame` 
+
+Install more Python dependencies with pip
+
+  - `sudo pip install web.py==0.40-dev1` 
   
 <h1>Installation</h1>
 
