@@ -124,7 +124,7 @@ class Meteo(object):
         return meteo_info
 
     def getMeteo(self, now):
-        date_keys = self.data.keys()
+        date_keys = list(self.data.keys())
         date_keys.sort()
         meteo_dict = {}
         meteo_dict["items"] = ["hour", "pres", "temp", "wind", "gust"]

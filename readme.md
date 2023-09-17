@@ -23,7 +23,7 @@ It still misses an outer case but you get the idea...
 
 <h1>Prerequisites</h1>
 
-  - A PaPiRus hat installed and working thanks to the [PaPiRus Python library](https://github.com/PiSupply/PaPiRus) already mentioned. Please note that this is for Python 2 (2.7) only. Although the sofware should adapt the font size depending on the size of the screen for better results choose the largest 2.7" screen.
+  - A PaPiRus hat installed and working thanks to the [PaPiRus Python library](https://github.com/PiSupply/PaPiRus) already mentioned. Although the sofware should adapt the font size depending on the size of the screen for better results choose the largest 2.7" screen.
   - A WiFi dongle or a working on board WiFi if you are using the Raspberry Pi 3
   - An Internet connection
   - A Google Map API key (see [here](https://developers.google.com/maps/documentation/geolocation/intro)) for geolocation with WiFi
@@ -37,12 +37,12 @@ Install Pygame
   - `sudo apt-get -y install python-pip`
   - `sudo apt-get -y install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev`
   - `sudo apt-get -y install libsmpeg-dev libportmidi-dev libavformat-dev libswscale-dev`
-  - `sudo pip install pygame` 
+  - `sudo pip install pygame`
 
 Install more Python dependencies with pip
 
-  - `sudo pip install web.py==0.40-dev1` 
-  
+  - `sudo pip install web.py==0.40-dev1`
+
 <h1>Installation</h1>
 
 <h2>Install package</h2>
@@ -62,13 +62,33 @@ In order to be able to use WiFi geolocation at startup you need to save your Goo
 
 Of course the key is made up you have to replace with your own.
 
-<h3>Install</h3>
+<h3>Install in a virtual environment</h3>
 
-The most practical is to install as root in `/usr/local` like PaPiRus does. In the cloned repository do:
+Please note that Python3 is being used and only tftclock has been migrated to Python3
+
+Install pip and virtualenv if not done already
+```sh
+sudo apt install python3-pip python3-virtualenv
+```
+
+In the source folder create a virtual environment:
+```sh
+python3 -m venv venv
+```
+
+Activate the virtual environment and install dependencies
+```sh
+. venv/bin/activate
+pip install -r requirements.txt
+```
+
+<h3>Install system wide (needs root privileges)</h3>
+
+Install as root in `/usr/local` like PaPiRus does. In the cloned repository do:
 
   - `sudo python setup.py install`
 
-<h2>Control by supervisor</h2>
+<h2>Control by supervisor (legacy)</h2>
 
 The best way to run the clock software `papiclock` is to drive it with `supervisor`. `supervisor` is a Python package that run commands as daemons and lets you start, stop, restart, ask status and even view logs using a web interface.
 
@@ -131,27 +151,41 @@ The `papiclock` command will start automatically at boot time. You may then do t
   - start: `sudo supervisorctl start papiclock`
   - restart (both above combined): `sudo supervisorctl restart papiclock`
   - get status: `sudo supervisorctl status papiclock`
-  
+
 You can also perform these actions using the web interface at `http://localhost:9001` (default).
 
 With the configuraion above the log can be browsed in user's home `log` subdiractory as `~/log/papiclock.log`. It can also be accessed through the web interface. Please check the log if something unusual happens as this can give you more information.
+
+<h2>Control tftclock in virtual environment by supervisor</h2>
+
+Only the specific configuration for `tftclock` differs. It is written in `/etc/supervisor/conf.d/tftclock.conf`. Assume `pi` is your user (default user):
+
+<pre><code>[program:tftclock]
+command = /home/pi/papiclock/venv/bin/python3 /home/pi/papiclock/tftclock
+process_name = tftclock
+redirect_stderr = true
+stdout_logfile = /home/$USER/log/tftclock.log
+stdout_logfile_maxbytes = 10MB
+stdout_logfile_backups = 3
+loglevel = info
+</code></pre>
 
 <h2>Parameters</h2>
 
 `papiclock` accepts the following optional parameters:
 
   - `-I` or `--interface`: this is the name of the WiFi interface if you use WiFi geolocation (default: `wlan0`)
-  - `-L` or `--latitude`: this is the location latitude. If you specify both latitude and longitude then WiFi geolocation is disabled and this location data is used instead 
+  - `-L` or `--latitude`: this is the location latitude. If you specify both latitude and longitude then WiFi geolocation is disabled and this location data is used instead
   - `-l` or `--longitude`: this is the location longitude.
   - `-p` or `--port`: this is the port number on which the REST API listens
   - `-f` or `--fbdevice` (tftclock only) this is the framebuffer device (default `/dev/fb0`)
-  
+
 &#9758; if geolocation fails and no latitude and longitude are provided then it fallbacks to the default location hardcoded in the program as `CLOCK_LATITUDE` and `CLOCK_LONGITUDE` which are the coordinates of the center of Antibes, France.
-  
+
 <h1>Program for TFT displays</h1>
 
-NEW! `tftclock` is a program specific for TFT displays that is otherwise similar to `papiclock` in every way. In the previous installation instructions just replace "papiclock" with "tftclock" and you should be able to get it going exactly the same way. 
-  
+NEW! `tftclock` is a program specific for TFT displays that is otherwise similar to `papiclock` in every way. In the previous installation instructions just replace "papiclock" with "tftclock" and you should be able to get it going exactly the same way.
+
 <h1>Clock display</h1>
 
 <h2>General</h2>
@@ -161,7 +195,7 @@ NEW! `tftclock` is a program specific for TFT displays that is otherwise similar
   - The first line is the hour in HH:MM:SS format. IT is updated every 2 seconds
   - The second line is the date in WWW DD MMM format with French acronyms for weekdays and months (can be changed in the code easily)
   - The bottom part of the screen has weather forecast information. There is one column per 3 hour period starting at the time specified at the top of the column. The first column is for the 3 hour period containing the current time. Therefor the forcast can be from 9 to 12 hours. The detail of the column information is given next
-  
+
 <h2>Weather forecast columns</h2>
 
 ![PaPiClock weather](doc/img/PaPiClock_weather.png)
@@ -174,7 +208,7 @@ Starting hour of the 3 hour period (local time)
 
   - blank: same run data as last hour
   - `*`: model data has changed since last hour
-  
+
 <h3>Pressure at sea level</h3>
 
 This is the pressure at sea level in hPa
@@ -210,7 +244,7 @@ When papiclock is started a mini server is started to serve a REST API to remote
 Available APIs are
 
   - /meteo: gets meteorogical information (GET)
-  
+
 <h2>meteo</h2>
 
 This api returns the meteo information that has been obtained from Infoclimat. This can serve as a proxy to minimize access to Infoclimat API. As it returns the full data from Infoclimat more time slices and more items are available than on the PaPiClock display.

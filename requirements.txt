@@ -1,3 +1,4 @@
+Pillow
 pygame
 requests
 web.py
