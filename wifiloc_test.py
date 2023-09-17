@@ -19,10 +19,10 @@ def main():
     parser.add_argument("-I", "--interface", help="wireless network interface", default="wlan0")
     parser.add_argument("-L", "--latitude", help="latitude of point of interest", type=float)
     parser.add_argument("-l", "--longitude", help="longitude of point of interest", type=float)
-    args = parser.parse_args()    
+    args = parser.parse_args()
 
     if args.latitude and args.longitude:
-	print("ll=%f,%f" %(args.latitude, args.longitude))
+        print("ll=%f,%f" %(args.latitude, args.longitude))
     else:
         geoloc = papiClock.WifiLocate()
         if geoloc.scan(interface=args.interface):

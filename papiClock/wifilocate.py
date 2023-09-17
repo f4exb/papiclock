@@ -17,12 +17,12 @@
 import re
 import subprocess
 import json, requests
-import logger
+import papiClock.logger as logger
 
 # Create googlekey.py inside papiClock package with a single line with your Google Maps geolocation API key:
 # KEY=<YOUR_API_KEY>
 # (See: https://developers.google.com/maps/documentation/geolocation/intro)
-import googlekey
+import papiClock.googlekey as gk
 
 cellNumberRe = re.compile(r"^Cell\s+(?P<cellnumber>.+)\s+-\s+Address:\s(?P<mac>.+)$")
 regexps = [
@@ -38,7 +38,7 @@ regexps = [
 # Runs the comnmand to scan the list of networks.
 # Must run as super user.
 def scan(interface='wlan0'):
-    zlog = logger.getLogger() 
+    zlog = logger.getLogger()
     cmd = ["iwlist", interface, "scan"]
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     scantext = proc.stdout.read().decode('utf-8')
@@ -67,12 +67,12 @@ class WifiLocate:
         self.lon = 0
         self.radius = None
         self.cells = []
-        
+
     def scan(self, interface='wlan0'):
         zlog = logger.getLogger()
         try:
             scantext = scan(interface)
-	    if scantext:
+            if scantext:
                 self.cells = parse(scantext)
                 zlog.logger.info(self.cells)
                 return True
@@ -81,7 +81,7 @@ class WifiLocate:
         except Exception as e:
             zlog.logger.error("Exception %s in WiFi scanner" % str(e))
             return False
-        
+
     def locate(self):
         zlog = logger.getLogger()
         request = {
@@ -98,7 +98,7 @@ class WifiLocate:
                 zlog.logger.error("Exception %s for cell %s" % (str(e), str(cell)))
                 pass
         try:
-            googleurl = "https://www.googleapis.com/geolocation/v1/geolocate?key=%s" % googlekey.KEY
+            googleurl = "https://www.googleapis.com/geolocation/v1/geolocate?key=%s" % gk.KEY
             r = requests.post(googleurl, json=request)
             if r.status_code == 200:
                 response = r.json()

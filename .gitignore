@@ -1,3 +1,4 @@
 build
 *.pyc
 papiClock/googlekey.py
+venv/

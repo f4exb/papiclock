@@ -18,9 +18,10 @@
 # InfoClimat is a non profit association of weather enthusiasts making
 # their weather prediction API freely available
 
-import urllib2, urllib, json
+import urllib.request, json
 import threading, time, datetime
-import test, logger
+import test
+import papiClock.logger as logger
 
 METEO_BASE_URL = "http://www.infoclimat.fr/public-api/gfs/json?_ll={lat:.6f},{lon:.6f}&_auth=AhhRRlIsAyFVeFZhA3UHLlM7BDFaLAIlAn4DYFs%2BUy5SOQVkD29RN14wUy4BLlZgUXxQMwA7AjJROlIqAXMEZQJoUT1SOQNkVTpWMwMsByxTfQRlWnoCJQJpA2ZbKFMyUjMFaQ9yUTFeNFMzAS9WYFFjUDIAIAIlUTNSMAFsBGYCYlE1UjUDZVU%2FVjMDLAcsU2UEbVpiAmkCYANiWz5TOVI5BWgPOVE3XmVTMwEvVmRRa1A3ADYCPVE1UjQBZQR4An5RTFJCA3xVelZ2A2YHdVN9BDFaOwJu&_c=3f9569aaf189f4574d6c65e2f9ae66f0"
 
@@ -40,13 +41,18 @@ class Meteo(object):
 
     def getInfoWorker(self, url):
         zlog = logger.getLogger()
-        result = urllib2.urlopen(self.info_climat.url).read()
-        self.result_info_climat = json.loads(result)
-        #time.sleep(1)
-        #self.result_info_climat = test.METEO_TEST_RESULT
-        zlog.logger.info("Got result")
-        self.parseInfo()
-        self.data_available = True
+        r = urllib.request.urlopen(url)
+        if r.getcode() == 200:
+            result = r.read()
+            self.result_info_climat = json.loads(result)
+            #time.sleep(1)
+            #self.result_info_climat = test.METEO_TEST_RESULT
+            zlog.logger.info("Got result")
+            self.parseInfo()
+            self.data_available = True
+        else:
+            zlog.logger.error("Info Climat returmed %d" % r.getcode())
+            self.data_available = False
 
     def getInfo(self):
         t = threading.Thread(target=self.getInfoWorker, args=(self.info_climat.url,))
@@ -61,13 +67,13 @@ class Meteo(object):
             if msg_rc == "OK":
                 zlog.logger.info("request OK")
             else:
-                zlog.logger.error("message error %s" % message_rc)
+                zlog.logger.error("message error %s" % msg_rc)
                 return
         else:
             zlog.logger.error("request error %d" % http_rc)
             return
         self.result_available = True
-        for k, v in self.result_info_climat.iteritems():
+        for k, v in self.result_info_climat.items():
             try:
                 if k == "request_state":
                     pass
@@ -94,7 +100,7 @@ class Meteo(object):
     def parseItem(self, ts, info):
         zlog = logger.getLogger()
         meteo_info = {}
-        for k, v in info.iteritems():
+        for k, v in info.items():
             try:
                 if k == "pression":
                     meteo_info["pression"] = v["niveau_de_la_mer"] / 100.0
