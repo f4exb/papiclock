@@ -25,7 +25,7 @@ import test
 import papiClock.logger as logger
 
 RUN_NUMBER = 0
-METEO_BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude={lat:.6f}&longitude={lon:.6f}&hourly=temperature_2m,relativehumidity_2m,precipitation,snowfall,pressure_msl,windspeed_10m,winddirection_10m,windgusts_10m,soil_temperature_0cm,freezinglevel_height"
+METEO_BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude={lat:.6f}&longitude={lon:.6f}&hourly=temperature_2m,relativehumidity_2m,precipitation,snowfall,pressure_msl,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,windspeed_10m,winddirection_10m,windgusts_10m,soil_temperature_0cm,freezinglevel_height"
 
 class OpenMeteo(object):
     def __init__(self, latitude, longitude):
@@ -108,10 +108,10 @@ class Meteo(object):
             report_item["risque_neige"] = "non" if self.result_meteo_orig["hourly"]["snowfall"][time_index] == 0 else "oui"
             report_item["cape"] = 0
             report_item["nebulosite"] = {
-                "haute": 0,
-                "moyenne": 0,
-                "basse": 0,
-                "totale": 100
+                "haute": self.result_meteo_orig["hourly"]["cloudcover_high"][time_index],
+                "moyenne": self.result_meteo_orig["hourly"]["cloudcover_mid"][time_index],
+                "basse": self.result_meteo_orig["hourly"]["cloudcover_low"][time_index],
+                "totale": self.result_meteo_orig["hourly"]["cloudcover"][time_index]
             }
 
     def parseInfoLegacy(self):
