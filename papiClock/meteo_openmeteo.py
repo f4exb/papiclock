@@ -193,7 +193,7 @@ class Meteo(object):
         for dk in date_keys:
             if dk > now - datetime.timedelta(hours=1):
                 date_count += 1
-                if date_count % 2 != 0:
+                if date_count % 3 != 0:
                     continue
                 if len(meteo_dict["hour"]) == 0 and self.previous_run_number != self.run_number:
                     meteo_dict["hour"].append(dk.strftime("%H:%M*"))
