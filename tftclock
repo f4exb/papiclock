@@ -94,7 +94,7 @@ def main():
                 lon = geoloc.lon
             else:
                 LOGGER.logger.info("cannot geolocate")
-        else:   
+        else:
             LOGGER.logger.info("no results to WiFi scan")
 
     if lat is None:
@@ -107,7 +107,7 @@ def main():
     size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
     LOGGER.logger.info('About to pygame.display.set_mode')
     screen = pygame.display.set_mode(size, pygame.FULLSCREEN|pygame.NOFRAME, 8)
-    
+
     LOGGER.logger.info('panel = {w:d} x {h:d}'.format(w=size[0], h=size[1]))
 
     try:
@@ -115,7 +115,7 @@ def main():
         papiClock.apiserver.meteo_dict["geoloc"]["lon"] = lon
 
         api_th = threading.Thread(target=apiWorker, args=(args.port,))
-        api_th.start() # Start REST API server 
+        api_th.start() # Start REST API server
 
         run(size, lat, lon)
 
@@ -172,14 +172,14 @@ def run(size, lat, lon):
     draw.rectangle((0, 0, width, height), fill=WHITE, outline=WHITE)
     previous_second = 0
     previous_day = 0
-    
+
     # fetch initial meteo data
     meteo = papiClock.Meteo(lat, lon)
     meteo.getInfo()
     meteo_init = True
-    
+
     zlog = papiClock.logger.getLogger()
-    
+
     while True:
         while True:
             now = datetime.today()
@@ -203,7 +203,7 @@ def run(size, lat, lon):
                 if meteo.previous_run_number != meteo.run_number:
                     papiClock.apiserver.meteo_dict["update_ts"] = time.mktime(now.timetuple()) # Unix timestamp of last change (now)
                 papiClock.apiserver.meteo_dict["run_number"] = meteo.run_number
-                papiClock.apiserver.meteo_dict["data"] = meteo.result_info_climat
+                papiClock.apiserver.meteo_dict["data"] = meteo.result_meteo_info
             if meteo.data_available:
                 meteo_init = False
                 meteo_dict = meteo.getMeteo(now)

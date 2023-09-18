@@ -14,25 +14,27 @@
 # express or implied.  See the License for the specific language
 # governing permissions and limitations under the License.
 
-# Many thanks to InfoClimat: http://www.infoclimat.fr
-# InfoClimat is a non profit association of weather enthusiasts making
-# their weather prediction API freely available
+# Many thanks to Open-Meteo: https://open-meteo.com/
+# Open-Meteo offers free access to its APIs for non-commercial use,
+# making it convenient for individuals and developers to explore
+# and integrate weather data into their projects.
 
 import urllib.request, json
 import threading, time, datetime
 import test
 import papiClock.logger as logger
 
-METEO_BASE_URL = "http://www.infoclimat.fr/public-api/gfs/json?_ll={lat:.6f},{lon:.6f}&_auth=AhhRRlIsAyFVeFZhA3UHLlM7BDFaLAIlAn4DYFs%2BUy5SOQVkD29RN14wUy4BLlZgUXxQMwA7AjJROlIqAXMEZQJoUT1SOQNkVTpWMwMsByxTfQRlWnoCJQJpA2ZbKFMyUjMFaQ9yUTFeNFMzAS9WYFFjUDIAIAIlUTNSMAFsBGYCYlE1UjUDZVU%2FVjMDLAcsU2UEbVpiAmkCYANiWz5TOVI5BWgPOVE3XmVTMwEvVmRRa1A3ADYCPVE1UjQBZQR4An5RTFJCA3xVelZ2A2YHdVN9BDFaOwJu&_c=3f9569aaf189f4574d6c65e2f9ae66f0"
+RUN_NUMBER = 0
+METEO_BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude={lat:.6f}&longitude={lon:.6f}&hourly=temperature_2m,relativehumidity_2m,precipitation,snowfall,pressure_msl,windspeed_10m,winddirection_10m,windgusts_10m,soil_temperature_0cm,freezinglevel_height"
 
-class InfoClimat(object):
+class OpenMeteo(object):
     def __init__(self, latitude, longitude):
         self.url = METEO_BASE_URL.format(lat=latitude, lon=longitude)
 
 class Meteo(object):
     def __init__(self, latitude, longitude):
-        self.info_climat = InfoClimat(latitude, longitude)
-        self.result_info_climat = None
+        self.meteo_info = OpenMeteo(latitude, longitude)
+        self.result_meteo_info = None
         self.result_available = False
         self.data_available = False
         self.run_number = 0
@@ -44,26 +46,80 @@ class Meteo(object):
         r = urllib.request.urlopen(url)
         if r.getcode() == 200:
             result = r.read()
-            self.result_info_climat = json.loads(result)
+            self.result_meteo_orig = json.loads(result)
             #time.sleep(1)
-            #self.result_info_climat = test.METEO_TEST_RESULT
+            #self.result_meteo_info = test.METEO_TEST_RESULT
             zlog.logger.info("Got result")
             self.parseInfo()
             self.data_available = True
         else:
-            zlog.logger.error("Info Climat returmed %d" % r.getcode())
+            zlog.logger.error("Open-Meteo returned %d" % r.getcode())
             self.data_available = False
 
     def getInfo(self):
-        t = threading.Thread(target=self.getInfoWorker, args=(self.info_climat.url,))
+        t = threading.Thread(target=self.getInfoWorker, args=(self.meteo_info.url,))
         t.start()
 
     def parseInfo(self):
+        global RUN_NUMBER
+        if RUN_NUMBER < 100:
+            RUN_NUMBER += 1
+        else:
+            RUN_NUMBER = 1
+        self.convertInfo()
+        self.parseInfoLegacy()
+
+    def convertInfo(self):
+        self.result_meteo_info = {}
+        self.result_meteo_info["request_state"] = 200
+        self.result_meteo_info["request_key"] = "fd543c77e33d6c8a5e218e948a19e487"
+        self.result_meteo_info["message"] = "OK"
+        self.result_meteo_info["model_run"] = "%02d" % RUN_NUMBER
+        self.result_meteo_info["source"] =  "internal:GFS:1"
+        time_line = self.result_meteo_orig["hourly"]["time"]
+        for time_index, time_stanp in enumerate(time_line):
+            dt = datetime.datetime.strptime(time_stanp, "%Y-%m-%dT%H:%M")
+            report_item = {}
+            self.result_meteo_info[dt.strftime("%Y-%m-%d %H:%M:%S")] = report_item
+            report_item["temperature"] = {
+                "2m": self.result_meteo_orig["hourly"]["temperature_2m"][time_index] + 273,
+                "sol": self.result_meteo_orig["hourly"]["soil_temperature_0cm"][time_index] +273,
+                "500hPa": -0.1,
+                "850hPa": -0.1
+            }
+            report_item["pression"] = {
+                "niveau_de_la_mer": self.result_meteo_orig["hourly"]["pressure_msl"][time_index]*100
+            }
+            report_item["pluie"] = round(self.result_meteo_orig["hourly"]["precipitation"][time_index])
+            report_item["pluie_convective"] = 0
+            report_item["humidite"] = {
+                "2m": self.result_meteo_orig["hourly"]["relativehumidity_2m"][time_index]
+            }
+            report_item["vent_moyen"] = {
+                "10m": self.result_meteo_orig["hourly"]["windspeed_10m"][time_index]
+            }
+            report_item["vent_rafales"] = {
+                "10m": self.result_meteo_orig["hourly"]["windgusts_10m"][time_index]
+            }
+            report_item["vent_direction"] = {
+                "10m": self.result_meteo_orig["hourly"]["winddirection_10m"][time_index]
+            }
+            report_item["iso_zero"] = round(self.result_meteo_orig["hourly"]["freezinglevel_height"][time_index])
+            report_item["risque_neige"] = "non" if self.result_meteo_orig["hourly"]["snowfall"][time_index] == 0 else "oui"
+            report_item["cape"] = 0
+            report_item["nebulosite"] = {
+                "haute": 0,
+                "moyenne": 0,
+                "basse": 0,
+                "totale": 100
+            }
+
+    def parseInfoLegacy(self):
         zlog = logger.getLogger()
         self.result_available = False
-        http_rc = self.result_info_climat.get("request_state", 0)
+        http_rc = self.result_meteo_info.get("request_state", 0)
         if http_rc == 200:
-            msg_rc = self.result_info_climat.get("message", "KO")
+            msg_rc = self.result_meteo_info.get("message", "KO")
             if msg_rc == "OK":
                 zlog.logger.info("request OK")
             else:
@@ -73,7 +129,7 @@ class Meteo(object):
             zlog.logger.error("request error %d" % http_rc)
             return
         self.result_available = True
-        for k, v in self.result_info_climat.items():
+        for k, v in self.result_meteo_info.items():
             try:
                 if k == "request_state":
                     pass
@@ -133,8 +189,12 @@ class Meteo(object):
         meteo_dict["temp"] = []
         meteo_dict["wind"] = []
         meteo_dict["gust"] = []
+        date_count = -1
         for dk in date_keys:
-            if dk > now - datetime.timedelta(hours=3):
+            if dk > now - datetime.timedelta(hours=1):
+                date_count += 1
+                if date_count % 2 != 0:
+                    continue
                 if len(meteo_dict["hour"]) == 0 and self.previous_run_number != self.run_number:
                     meteo_dict["hour"].append(dk.strftime("%H:%M*"))
                 else:
