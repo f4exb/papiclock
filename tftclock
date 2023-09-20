@@ -214,7 +214,7 @@ def run(size, lat, lon):
                         if ix == 0: # hours - use extra width (ix = 0)
                             hour_text = meteo_dict[it][iy]
                             new_hour_text = hour_text[:3]
-                            if hour_text == "*":
+                            if hour_text[5] == "*":
                                 new_hour_text[2] = "*"
                             draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), new_hour_text, fill=BLACK, font=meteo_font)
                             meteo_log[iy][ix] = new_hour_text
