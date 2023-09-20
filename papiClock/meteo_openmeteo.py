@@ -32,8 +32,9 @@ class OpenMeteo(object):
         self.url = METEO_BASE_URL.format(lat=latitude, lon=longitude)
 
 class Meteo(object):
-    def __init__(self, latitude, longitude):
+    def __init__(self, latitude, longitude, nb_meteo_items=4):
         self.meteo_info = OpenMeteo(latitude, longitude)
+        self.nb_meteo_items = nb_meteo_items
         self.result_meteo_info = None
         self.result_available = False
         self.data_available = False
@@ -220,7 +221,7 @@ class Meteo(object):
                     meteo_dict["gust"].append("%3.0f%s%2.0f" % (vent_raf, neige_char, round(humidite, 0)))
                 else:
                     meteo_dict["gust"].append("%2.0f %s%2.0f" % (vent_raf, neige_char, round(humidite, 0)))
-                if len(meteo_dict["hour"]) == 4:
+                if len(meteo_dict["hour"]) == self.nb_meteo_items:
                     break
         return meteo_dict
 

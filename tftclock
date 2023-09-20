@@ -174,7 +174,7 @@ def run(size, lat, lon):
     previous_day = 0
 
     # fetch initial meteo data
-    meteo = papiClock.Meteo(lat, lon)
+    meteo = papiClock.Meteo(lat, lon, 5)
     meteo.getInfo()
     meteo_init = True
 
@@ -220,7 +220,7 @@ def run(size, lat, lon):
                             meteo_log[iy][ix] = new_hour_text
                         else: # lay horizontally shifted by extra width (ix = 1..4)
                             draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][iy], fill=BLACK, font=meteo_font)
-                            meteo_log[iy][ix] = meteo_dict[it][ix]
+                            meteo_log[iy][ix] = meteo_dict[it][iy]
                 # for ix in range(len(meteo_dict["hour"])):
                 #     for iy, it in enumerate(meteo_dict["items"]):
                 #         draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][ix], fill=BLACK, font=meteo_font)
