@@ -15,7 +15,7 @@
 # governing permissions and limitations under the License.
 
 class ClockDims:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width, screen_height, extra_width=0):
         self.screen_width = screen_width,
         self.screen_height = screen_width,
         self.top_margin = 1
@@ -30,7 +30,9 @@ class ClockDims:
         self.meteo_y = []
         for i in range(5):
             self.meteo_y.append(self.clock_font_size + self.date_font_size + self.clock_interline + i*self.meteo_font_size)
-        self.meteo_x = []    
+        self.meteo_x = []
+        if extra_width:
+            self.meteo_x.append(0)
         for i in range(4):
-            self.meteo_x.append(int(i*(screen_width/4.0)))
+            self.meteo_x.append(int(i*(screen_width/4.0) + extra_width))
 
