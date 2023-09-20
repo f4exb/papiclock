@@ -213,9 +213,11 @@ def run(size, lat, lon):
                     for ix, it in enumerate(meteo_dict["items"]):
                         if ix == 0: # hours - use extra width (ix = 0)
                             hour_text = meteo_dict[it][iy]
-                            new_hour_text = hour_text[:3]
+                            new_hour_text = hour_text[:2]
                             if hour_text[5] == "*":
-                                new_hour_text[2] = "*"
+                                new_hour_text += "*"
+                            else:
+                                new_hour_text += " "
                             draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), new_hour_text, fill=BLACK, font=meteo_font)
                             meteo_log[iy][ix] = new_hour_text
                         else: # lay horizontally shifted by extra width (ix = 1..4)
