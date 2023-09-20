@@ -208,18 +208,18 @@ def run(size, lat, lon):
                 meteo_init = False
                 meteo_dict = meteo.getMeteo(now)
                 draw.rectangle((cd.left_margin, cd.sep_y, width - 2, height - 2), fill=WHITE, outline=WHITE) # prepare meteo redraw
-                meteo_log = [["" for y in range(len(meteo_dict["hour"]))] for x in range(len(meteo_dict["items"]))]
+                meteo_log = [["" for x in range(len(meteo_dict["items"]))] for y in range(len(meteo_dict["hours"]))]
                 for iy in range(len(meteo_dict["hour"])):
                     for ix, it in enumerate(meteo_dict["items"]):
                         if ix == 0: # hours - use extra width (ix = 0)
-                            hour_text = meteo_dict[it][ix]
+                            hour_text = meteo_dict[it][iy]
                             new_hour_text = hour_text[:3]
                             if hour_text == "*":
                                 new_hour_text[2] = "*"
-                            draw.text(cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy], new_hour_text, fill=BLACK, font=meteo_font)
+                            draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), new_hour_text, fill=BLACK, font=meteo_font)
                             meteo_log[iy][ix] = new_hour_text
                         else: # lay horizontally shifted by extra width (ix = 1..4)
-                            draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][ix], fill=BLACK, font=meteo_font)
+                            draw.text((cd.left_margin + cd.meteo_x[ix], cd.meteo_y[iy]), meteo_dict[it][iy], fill=BLACK, font=meteo_font)
                             meteo_log[iy][ix] = meteo_dict[it][ix]
                 # for ix in range(len(meteo_dict["hour"])):
                 #     for iy, it in enumerate(meteo_dict["items"]):
