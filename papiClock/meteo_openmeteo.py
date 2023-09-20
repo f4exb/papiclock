@@ -25,7 +25,7 @@ import test
 import papiClock.logger as logger
 
 RUN_NUMBER = 0
-METEO_BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude={lat:.6f}&longitude={lon:.6f}&hourly=temperature_2m,relativehumidity_2m,precipitation,snowfall,pressure_msl,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,windspeed_10m,winddirection_10m,windgusts_10m,soil_temperature_0cm,freezinglevel_height"
+METEO_BASE_URL = "https://api.open-meteo.com/v1/forecast?latitude={lat:.6f}&longitude={lon:.6f}&hourly=temperature_2m,relativehumidity_2m,precipitation,snowfall,pressure_msl,cloudcover,cloudcover_low,cloudcover_mid,cloudcover_high,windspeed_10m,winddirection_10m,windgusts_10m,soil_temperature_0cm,freezinglevel_height,temperature_850hPa,temperature_500hPa"
 
 class OpenMeteo(object):
     def __init__(self, latitude, longitude):
@@ -85,8 +85,8 @@ class Meteo(object):
             report_item["temperature"] = {
                 "2m": self.result_meteo_orig["hourly"]["temperature_2m"][time_index] + 273,
                 "sol": self.result_meteo_orig["hourly"]["soil_temperature_0cm"][time_index] +273,
-                "500hPa": -0.1,
-                "850hPa": -0.1
+                "500hPa": self.result_meteo_orig["hourly"]["temperature_500hPa"][time_index] +273,
+                "850hPa": self.result_meteo_orig["hourly"]["temperature_850hPa"][time_index] +273
             }
             report_item["pression"] = {
                 "niveau_de_la_mer": self.result_meteo_orig["hourly"]["pressure_msl"][time_index]*100
