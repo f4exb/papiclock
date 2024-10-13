@@ -144,23 +144,26 @@ class Meteo(object):
                 meteo_dict["pres"].append("%.1f" % pres)
                 temp = self.data[dk].get("temperature", 0)
                 pluie = self.data[dk].get("pluie", 0)
-                if pluie >= 100:
-                    meteo_dict["temp"].append("%+2.0f%3.0f" % (temp, round(pluie, 0)))
-                else:
-                    meteo_dict["temp"].append("%+2.0f %2.0f" % (temp, round(pluie, 0)))
                 vent_moy = self.data[dk].get("vent_moyen", 0)
                 vent_dir = self.data[dk].get("vent_direction", 0)
-                if vent_moy >= 100:
-                    meteo_dict["wind"].append("%3.0f%03d" % (vent_moy, vent_dir))
-                else:
-                    meteo_dict["wind"].append("%2.0f %03d" % (vent_moy, vent_dir))
                 vent_raf = self.data[dk].get("vent_rafales", 0)
                 neige_char = "*" if self.data[dk].get("risque_neige", False) else " "
                 humidite = self.data[dk].get("humidite", 0)
-                if vent_raf >= 100:
-                    meteo_dict["gust"].append("%3.0f%s%2.0f" % (vent_raf, neige_char, round(humidite, 0)))
+                meteo_dict["temp"].append("%+2.0f%s%2.0f" % (temp, neige_char, round(humidite, 0)))
+                if pluie >= 100:
+                    meteo_dict["wind"].append("%3.0f%03d" % (round(pluie, 0), vent_dir))
                 else:
-                    meteo_dict["gust"].append("%2.0f %s%2.0f" % (vent_raf, neige_char, round(humidite, 0)))
+                    meteo_dict["wind"].append("%2.0f %03d" % (round(pluie, 0), vent_dir))
+                if vent_moy >= 100:
+                    if vent_raf >= 100:
+                        meteo_dict["gust"].append("%3.0f%3.0f" % (vent_moy, vent_raf))
+                    else:
+                        meteo_dict["gust"].append("%3.0f %2.0f" % (vent_moy, vent_raf))
+                else:
+                    if vent_raf >= 100:
+                        meteo_dict["gust"].append("%2.0f %3.0f" % (vent_moy, vent_raf))
+                    else:
+                        meteo_dict["gust"].append("%2.0f %2.0f" % (vent_moy, vent_raf))
                 if len(meteo_dict["hour"]) == self.nb_meteo_items:
                     break
         return meteo_dict
